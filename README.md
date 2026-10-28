@@ -1,6 +1,11 @@
-# Gwent p2p online 
+# Gwent (Classic P2P Online)
 
 **Classic Gwent. Private matches with friends. A standalone Windows experience.**
+<img width="1417" height="920" alt="image" src="https://github.com/user-attachments/assets/dadf86c4-cea1-43ac-ad02-edb4f796b57a" />
+
+<img width="1919" height="1028" alt="image" src="https://github.com/user-attachments/assets/5b2e0b93-ccc8-4c0c-b95f-bcbebe72679c" />
+
+
 
 Play the original Gwent minigame against the AI, or invite a friend to a private
 online match with a single code. Gwent Classic Online preserves the familiar
