@@ -1,9 +1,7 @@
 # Gwent (Classic P2P Online)
 
 **Classic Gwent. Private matches with friends. A standalone Windows experience.**
-<img width="1417" height="920" alt="image" src="https://github.com/user-attachments/assets/dadf86c4-cea1-43ac-ad02-edb4f796b57a" />
 
-<img width="1919" height="1028" alt="image" src="https://github.com/user-attachments/assets/5b2e0b93-ccc8-4c0c-b95f-bcbebe72679c" />
 
 
 
@@ -12,9 +10,16 @@ online match with a single code. Gwent Classic Online preserves the familiar
 cards, factions, leaders and board while adding an integrated multiplayer lobby,
 host-controlled rules and reconnection support.
 
+
+
+<img width="1417" height="920" alt="image" src="https://github.com/user-attachments/assets/dadf86c4-cea1-43ac-ad02-edb4f796b57a" />
+
 No game account, manually configured game server, port forwarding or offer/answer
 exchange is required. Online connectivity depends on the players’ networks and
 public signaling availability; see [Networking](#networking).
+
+
+<img width="1919" height="1028" alt="image" src="https://github.com/user-attachments/assets/5b2e0b93-ccc8-4c0c-b95f-bcbebe72679c" />
 
 
 
