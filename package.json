@@ -1,0 +1,66 @@
+{
+  "name": "gwent-classic-online",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Classic Gwent for Windows, with private peer-to-peer matches",
+  "author": "Gwent Classic contributors; original game by Arun Sundaram",
+  "license": "SEE LICENSE IN LICENSE",
+  "main": "desktop/main.cjs",
+  "scripts": {
+    "postinstall": "node scripts/vendor.cjs",
+    "start": "electron .",
+    "test": "node --test tests/*.test.cjs",
+    "test:integration": "node tests/integration.cjs",
+    "check": "node scripts/check.cjs",
+    "dist:win": "electron-builder --win --x64",
+    "pack": "electron-builder --dir",
+    "test:browser": "node tests/browser.cjs"
+  },
+  "dependencies": {
+    "peerjs": "1.5.5"
+  },
+  "devDependencies": {
+    "electron": "45.1.0",
+    "electron-builder": "26.18.0",
+    "jsdom": "27.4.0",
+    "peer": "1.0.2",
+    "playwright": "1.64.1"
+  },
+  "build": {
+    "appId": "org.pslproject.gwentclassiconline",
+    "productName": "Gwent Classic Online",
+    "asar": true,
+    "files": [
+      "index.html",
+      "*.js",
+      "style.css",
+      "online/**",
+      "desktop/**",
+      "vendor/**",
+      "img/**",
+      "sfx/**",
+      "svg/**",
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.md",
+      "package.json",
+      "!**/*.map"
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "signAndEditExecutable": false
+    },
+    "portable": {
+      "artifactName": "Gwent-Classic-Online-${version}-portable-x64.exe"
+    },
+    "nsis": {
+      "artifactName": "Gwent-Classic-Online-${version}-setup-x64.exe",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "license": "LICENSE"
+    },
+    "compression": "normal"
+  }
+}

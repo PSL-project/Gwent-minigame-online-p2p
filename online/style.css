@@ -1,0 +1,37 @@
+/* Additive desktop/online controls; original board and deck screens remain intact. */
+[hidden] { display: none !important; }
+#online-menu { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: #080706eb url('../img/board.jpg') center/cover; font-size: 16px; }
+.online-dialog { width: min(680px, 92vw); max-height: 94vh; overflow: auto; padding: 30px; background: #14120ff5; border: 1px solid #92702d; box-shadow: 0 15px 80px #000; color: #ddd1b4; text-align: center; }
+.online-dialog h1 { font: 36px Georgia, serif; margin: 5px 0 8px; color: goldenrod; }
+.online-dialog p { line-height: 1.55; }
+#online-menu button, #online-banner button, #online-dock button, #mode-menu { position: static; width: auto; height: auto; font: 15px Georgia, serif; color: #ead9b0; background: #282014; border: 1px solid #937537; padding: 10px 16px; margin: 5px; cursor: pointer; }
+#online-menu button:hover, #online-dock button:hover { background: #49391d; }
+#online-menu button:disabled, #online-dock button:disabled { opacity: .45; cursor: default; }
+#online-menu input { display: block; width: 100%; margin: 12px 0; padding: 12px; font: 13px monospace; border: 1px solid #806835; background: #070707; color: #eee; user-select: text; }
+#online-menu input::selection { background: #806835; }
+#online-modes > button { display: block; width: 100%; }
+#online-status { min-height: 2em; color: #cfb779; }
+.online-muted { color: #a99e87; font-size: 13px; }
+#mode-menu { position: fixed; top: 8px; left: 8px; z-index: 20; }
+#online-banner { position: fixed; top: 0; left: 0; width: 100%; min-height: 38px; padding: 2px 10px; z-index: 90; background: #100e0bf2; border-bottom: 1px solid #6c542d; font-size: 13px; display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+#online-connection { margin-right: auto; }
+#online-banner button { font: 12px Arial; padding: 5px 10px; }
+#online-banner.disconnected { background: #3d1d0c; }
+#online-dock { position: fixed; left: 0; bottom: 0; width: 100%; max-height: 31vh; z-index: 80; overflow-y: auto; padding: 10px 18px; background: #100e0bf5; border-top: 1px solid #92702d; font-size: 16px; }
+#online-dock strong { display: block; color: #e8d9ad; font: 18px Georgia, serif; }
+#online-dock p { margin: 8px 0; }
+.online-actions { display: flex; flex-wrap: wrap; align-items: stretch; }
+#online-dock button { font: 13px Arial; display: flex; align-items: center; gap: 6px; padding: 6px 10px; }
+#online-dock img { width: 30px; height: 44px; object-fit: cover; }
+.online-playing #end-screen, .online-playing #pass-button, .online-playing #exit-game { display: none !important; }
+.online-playing main { pointer-events: none; }
+.online-playing #deck-customization { display: none; }
+.online-playing #online-menu { background-color: #080706f0; }
+@media (max-height: 700px) { #online-dock { max-height: 28vh; } .online-dialog { padding: 18px; } }
+
+#online-inspector { position: fixed; inset: 38px 0 0; z-index: 95; background: #0b0907f5; overflow: auto; padding: 20px 4vw; font-size: 16px; color: #e8d9ad; }
+#online-inspect-close { position: sticky; top: 0; float: right; padding: 10px 20px; }
+#online-inspect-description { position: sticky; top: 0; max-width: 75%; padding: 10px; background: #17120c; line-height: 1.5; min-height: 3em; }
+#online-inspect-cards h3 { clear: both; margin: 16px 0 8px; }
+#online-inspect-cards button { background: #17120c; color: #e8d9ad; border: 1px solid #806835; padding: 6px; margin: 5px; width: 120px; font-size: 12px; vertical-align: top; }
+#online-inspect-cards img { display: block; width: 100%; margin-bottom: 5px; }
