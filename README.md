@@ -1,4 +1,4 @@
-# Gwent Classic Online
+# Gwent p2p online 
 
 **Classic Gwent. Private matches with friends. A standalone Windows experience.**
 
