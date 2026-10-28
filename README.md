@@ -11,7 +11,7 @@ No game account, manually configured game server, port forwarding or offer/answe
 exchange is required. Online connectivity depends on the players’ networks and
 public signaling availability; see [Networking](#networking).
 
-![Original Gwent board artwork, reused by the desktop application](img/board.jpg)
+
 
 ## Features
 
@@ -24,28 +24,6 @@ public signaling availability; see [Networking](#networking).
 - **Recoverable sessions:** interrupted connections pause play and attempt authenticated reconnection while both applications remain open.
 - **Windows packaging:** portable executable and installer targets, bundled game assets and automated Windows builds.
 
-## Windows downloads and installation
-
-Target: **Windows 10/11, 64-bit**. Players do not need Node.js, Python or development tools.
-
-Windows packages are produced by the
-[Windows desktop build workflow](https://github.com/PSL-project/Gwent-classic-online-p2p/actions/workflows/windows.yml).
-After this development branch is pushed, use a successful workflow run and download
-its **Gwent-Classic-Online-Windows-x64** artifact. Extract the downloaded ZIP before use.
-
-| Package | Use |
-| --- | --- |
-| `Gwent-Classic-Online-1.0.0-portable-x64.exe` | Launch directly; no installation step. |
-| `Gwent-Classic-Online-1.0.0-setup-x64.exe` | Run the installer and choose an installation location. |
-
-Builds are unsigned. Windows may identify them as coming from an unknown publisher;
-verify the source and build provenance before running downloaded software.
-The portable application still stores decks/settings in Electron’s per-user app-data
-folder; “portable” describes the executable, not a separate portable settings profile.
-
-Workflow artifacts are development builds. Public GitHub Releases are a separate
-maintainer action, and this change does not publish a release. Asset-redistribution
-rights must be resolved before public binary distribution; see [Licensing](#licensing-and-attribution).
 
 ## Play against the AI
 
@@ -143,61 +121,7 @@ without an explicit close event.
 Recovery is in memory. Closing/reloading either application loses its session;
 saving a match across application restarts is not implemented.
 
-## Build from source
 
-Use **Node.js 24**, npm and Git. Build Windows distributions on Windows for the
-full installer pipeline.
-
-```sh
-git clone https://github.com/PSL-project/Gwent-classic-online-p2p.git
-cd Gwent-classic-online-p2p
-# Check out the implementation branch if it has not yet been merged:
-git switch development/online-desktop
-npm ci
-npm start
-```
-
-`npm ci` installs the locked dependencies and copies PeerJS into the local vendor
-folder. Runtime scripts, game images, sound effects and SVGs are bundled; the
-application does not load its networking library from a CDN.
-
-```sh
-npm run check
-npm test
-npm run test:integration
-npx playwright install chromium
-npm run test:browser
-npm run dist:win -- --publish never
-```
-
-Outputs are written to `dist/`. `npm run pack` produces an unpacked application for
-the build machine’s platform. Cross-building the portable Windows target can use
-`npx electron-builder --win portable --x64 --publish never`; the full installer
-pipeline should run on Windows. No release is uploaded by these commands.
-
-The GitHub workflow runs syntax/asset checks, automated rules and simulated-client
-tests, a real PeerJS/WebRTC browser match using test-only local signaling, Windows
-packaging and a packaged-application smoke test before uploading artifacts. The
-local test signaling service is a development dependency and is not shipped.
-
-## Development and contributions
-
-| Component | Responsibility |
-| --- | --- |
-| `gwent.js`, `abilities.js`, `factions.js` | Original rules, AI, board and card effects. |
-| `online/protocol.js` | Invitation format, versioning, deck validation and action capabilities. |
-| `online/transport.js` | PeerJS lifecycle, authentication, heartbeat and recovery. |
-| `online/engine.js` | Host adapter, human choices, legal actions and filtered state views. |
-| `online/app.js`, `online/style.css` | Mode selection, lobby, guest rendering and online controls. |
-| `desktop/main.cjs` | Sandboxed Electron window and restricted local-resource protocol. |
-| `tests/` | Rules, transport, multi-client, browser and desktop checks. |
-| `DEVELOPMENT_STATUS.md` | Actual verification results and remaining platform checks. |
-
-Keep rule changes in the shared original engine so AI and multiplayer agree.
-Validate incoming data, preserve hidden-information boundaries, and add focused
-regressions for behavior changes. Avoid committing build outputs or duplicating
-existing media. Suggestions and contributions around relay connectivity,
-accessibility and broader Windows/network testing are welcome.
 
 ## Verification and current limitations
 
