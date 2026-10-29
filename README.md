@@ -6,7 +6,7 @@
 
 
 
-lost a loved one? crushed by the world problem? your daughter is in grave danger?
+lost a loved one? crushed by the world problems? your daughter is in grave danger?
 hmm... HOW ABOUT A ROUND OF GWENT?😂🤷‍♂️
 
 
