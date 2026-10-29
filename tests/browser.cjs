@@ -6,6 +6,7 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 const { PeerServer } = require('peer');
 const root = path.resolve(__dirname, '..');
+const { clickAction, specialScenarios } = require('./native-browser.cjs');
 (async () => {
   const server = http.createServer((req, res) => {
     const target = path.resolve(root, '.' + new URL(req.url, 'http://localhost').pathname);
@@ -68,18 +69,24 @@ const root = path.resolve(__dirname, '..');
     assert.equal(await host.evaluate(() => onlineApp.session.conn.dataChannel.readyState), 'open');
     await host.locator('#online-ready').click(); await guest.locator('#online-ready').click();
     await host.waitForFunction(() => onlineApp.engine?.prompt);
-    await host.getByRole('button', { name: 'Done / keep remaining cards' }).click();
-    await guest.getByRole('button', { name: 'Done / keep remaining cards' }).click();
+    // Both players redraw an actual illustrated card, then keep the rest.
+    for (const page of [host, guest]) {
+      await page.locator('#carousel:not(.hide)').waitFor();
+      await page.locator('#carousel > div:first-child > .card-lg').nth(2).click();
+      await page.waitForFunction(() => document.querySelector('#native-choice-done:not([hidden])') && onlineApp.latest.actions.some(a => a.kind === 'choice'));
+      await page.locator('#native-choice-done').click();
+    }
     await host.waitForFunction(() => onlineApp.engine.ready);
     await host.screenshot({ path: path.join(root, 'test-results/online-host.png') });
     await guest.screenshot({ path: path.join(root, 'test-results/online-guest.png') });
+    await specialScenarios(host, guest);
     // Disconnect a real RTC channel and resume using the preserved credentials.
     await guest.evaluate(() => { clearInterval(onlineApp.session.timer); onlineApp.session.conn.close(); });
     await host.waitForFunction(() => onlineApp.paused);
     await guest.locator('#online-retry').click();
     await host.waitForFunction(() => !onlineApp.paused);
     await guest.waitForFunction(() => !onlineApp.paused);
-    // Complete the match through the actual GUI action buttons and real DataChannel.
+    // Complete the match by clicking original hand cards, board rows and Pass.
     for (let n = 0; n < 180; n++) {
       await host.waitForFunction(() => onlineApp.latest?.state === 'complete' || onlineApp.engine.fault || onlineApp.engine.actions.some(a => a.length));
       const decision = await host.evaluate(() => {
@@ -88,22 +95,28 @@ const root = path.resolve(__dirname, '..');
         if (onlineApp.latest.state === 'complete') return null;
         const actor = e.actions[0].length ? 0 : 1;
         const a = e.actions[actor].find(a => a.kind === 'play') || e.actions[actor].find(a => a.kind === 'pass') || e.actions[actor][0];
-        return { actor, label: a.card && a.kind === 'play' ? card_dict[a.card.index].name : a.label, revision: e.caps.revision };
+        return { actor, action: a, revision: e.caps.revision };
       });
       if (!decision) break;
       const page = decision.actor ? guest : host;
       await page.waitForFunction(r => onlineApp.latest.revision === r, decision.revision);
-      await page.locator('#online-dock').getByRole('button', { name: decision.label, exact: true }).first().click();
-      // Multi-destination cards require a second target click.
-      const back = page.locator('#online-dock').getByRole('button', { name: '← Back', exact: true });
-      if (await back.count()) await page.locator('#online-dock .online-actions button').nth(1).click();
+      await clickAction(page, decision.action, decision.actor);
       await host.waitForFunction(r => onlineApp.engine.caps.revision !== r, decision.revision);
     }
     await guest.waitForFunction(() => onlineApp.latest.state === 'complete');
     assert.equal(await guest.evaluate(() => onlineApp.latest.players[0].hand), null);
     assert.deepEqual(await guest.evaluate(() => onlineApp.latest.history), await host.evaluate(() => onlineApp.latest.history));
+    assert.equal(await host.locator('#online-dock, .online-actions').count(), 0);
+    assert.equal(await guest.locator('#online-dock, .online-actions').count(), 0);
+    await host.locator('#end-screen button:visible').click();
+    await host.waitForFunction(() => window.onlineApp?.native && onlineApp.session === null && !onlineApp.playing);
+    await host.locator('#mode-host').waitFor();
+    await host.locator('#mode-single').click();
+    await host.evaluate(() => dm.loadPlayerDeck(JSON.parse(premade_deck[0]), false));
+    await host.locator('#start-game').click();
+    await host.locator('#carousel:not(.hide)').waitFor();
     assert.deepEqual(errors, []);
-    console.log('PASS: production-CSP single-player UI, two browser contexts with ' + (process.env.SIMULATE_WEBRTC ? 'simulated transport' : 'real PeerJS/WebRTC') + ', GUI deck/ready/actions, complete match, disconnect and resync.');
+    console.log('PASS: production-CSP single-player UI, two browser contexts with ' + (process.env.SIMULATE_WEBRTC ? 'simulated transport' : 'real PeerJS/WebRTC') + ', native graphical card/row/Pass controls, redraw, complete match, disconnect/resync and starting another game.');
   } finally {
     await hostContext?.close(); await guestContext?.close(); await browser.close(); peerServer.close(); server.close();
   }

@@ -1,86 +1,74 @@
 # Development status
 
-Branch: `development/online-desktop`.
-Base: `08592d847f2573440a34deb9f32bc855b2544cdd` (fork main at checkout).
+Branch: `feature/native-multiplayer-ui`.
+Base: `623fa31ff81e674dedc2f41179222f2f659a7b22`.
+The remote listed only `main` when inspected; this development branch was created
+locally from that base. No changes are committed to main.
 
-## Completed implementation: P1–P4
+## Native multiplayer integration
 
-- Inspected the original DOM-backed engine once and reused its rules, AI, cards,
-  deck editor and media. Existing `img/`, `sfx/`, `svg/` and `LICENSE` are unchanged.
-- PeerJS public signaling; one invitation encodes a random 192-bit peer ID and
-  192-bit secret. HMAC-SHA-256 proves invitation knowledge. Version checks,
-  bounded messages/queues/rates, heartbeat and signaling recovery are included.
-- Returning guests retain a random in-memory credential; another invitation
-  holder cannot seize an already bound guest seat.
-- The host alone executes original rules/randomness. Single-use action
-  capabilities bind actor and revision; incoming data never chooses functions.
-- Explicit player views omit the opposing hand and both draw-pile contents.
-  Rule-authorized reveals are delivered only to the acting player.
-- Both humans use the original card/faction effects through the host adapter,
-  including redraw, leaders, decoy, medics, agile rows and nested choices.
-- Mode menu, copy/join invitation, lobby, original deck customization,
-  ready/unready, live status, card inspection, pause/retry/abandon and results.
-- In-memory state and suspended choices resume after authenticated reconnect.
-- Original single-player AI, deck editor, sound and settings preserved;
-  optional online music is loaded on demand.
+- Original hand cards, battlefield rows, weather area, decoy targets, leader
+  cards and Pass control now submit host-issued action permissions for both players.
+- The original carousel presents redraw, medic, leader and authorized reveal
+  choices. Agile resurrection targets use highlighted battlefield rows; faction
+  decisions use the original confirmation dialog.
+- Both clients render filtered authoritative snapshots. Stable per-card IDs
+  distinguish identical card copies; destination metadata maps graphical input
+  onto existing single-use permissions. Actions still transmit only ID/revision.
+- The legacy engine is DOM-backed. On the host it runs in a separate hidden
+  same-origin document, so graphical rendering cannot detach its live objects or
+  execute rules on the guest. No second rules implementation was introduced.
+- Gameplay has no online action dock or separate inspection screen. Original
+  card previews, carousel navigation, score/gem/passed displays and result screen
+  are reused. A compact top bar retains connection and turn information.
+- Online sound/visual effects run on the visible projection; engine-document
+  cosmetic delays are skipped. Single-player files and behavior remain intact.
+- Pending submissions lock until a host update. Pause/reconnection clears local
+  selection and restores pending choices; stale views are ignored. Network text
+  is rendered as text, including prompts in reused legacy dialogs.
+- PeerJS, invitations, authentication, recovery credentials, host validation,
+  hidden-state filtering, rate limits and Electron sandbox defaults are retained.
+- Windows CI also runs simulated-transport native UI regression before real
+  local WebRTC checks. Packaged smoke checks include the secure rules iframe.
 
-## P5: actual verification
+## Verification in this run
 
 Passed:
-- `npm run check`: syntax, required bundled files and protocol/package version.
-- `npm test`: 11 tests, 0 failures. Includes invitation/deck validation,
-  actor/revision/duplicate protection, transport authentication and recovery,
-  impostor rejection and destroyed-peer ID recovery.
-- Rules tests assert bond/horn/weather/hero/scorch scoring, spy draws, muster,
-  medic choices, agile resurrection and legal decoy targets. All 17 active
-  leader abilities resolved through original effects and human prompts.
-- `npm run test:integration`: three complete simulated two-client matches
-  covering all five factions, hidden-state checks, invalid actions, disconnect,
-  paused-action rejection and identical state/history after recovery.
-- A complete original single-player match against the AI, including mulligan.
-- Empty draw piles are safe; Northern Realms waits for its bonus draw before
-  exposing the next turn and legal-action snapshot.
-- `SIMULATE_WEBRTC=1 npm run test:browser`: two isolated Chromium contexts,
-  actual Host/Join/deck/ready/action GUI, complete match and reconnect. Solo UI
-  also exercised under the production CSP. Screenshots visually inspected.
-- Production dependency audit: zero reported vulnerabilities.
-- Git diff confirms no existing media or original-license changes.
+- `npm run check`: syntax, bundled entry assets and version consistency.
+- `npm test`: 15 tests, zero failures. Original effects and all 17 active leaders;
+  transport authentication/recovery; duplicate/stale protection; native card-copy
+  selection, invalid targets, pending/paused/out-of-turn controls, private views,
+  malformed metadata and safe rendering of network text.
+- `npm run test:integration`: three complete simulated multiplayer matches
+  across all five factions; invalid actions, hidden state, pause/recovery/resync;
+  a complete original single-player match against the AI.
+- `SIMULATE_WEBRTC=1 npm run test:browser` with local Chromium 153: actual clicks
+  for both host and guest, redraw, spy, decoy, medic/agile choices, weather/clear,
+  horn, agile placement, scorch, leader, Pass, duplicate rejection, out-of-turn
+  inspection, reconnect during a medic choice and a normal turn, complete match,
+  synchronized results, action-dock absence and starting another game.
+- `npm audit --omit=dev --audit-level=high`: zero reported vulnerabilities.
+- Screenshots inspected: original board/cards/controls, no separate action list.
 
-Not verified locally:
-- Real PeerJS exchanged SDP offers/answers using a test-only local signaling
-  service, but native Chromium produced no ICE candidates even in an isolated
-  RTCPeerConnection probe. Direct DataChannel connectivity was unavailable.
-- Public-cloud peer registration did not complete during the local probe.
-  Internet host/join therefore requires verification on supported networks.
-- Native Windows execution is unavailable. Linux root/sandbox restrictions
-  prevented a valid Electron startup check; sandbox defaults were preserved.
+Build results and outstanding external verification:
+- Windows portable cross-build passed using
+  `npx electron-builder --win portable --x64 --publish never -c.compression=store -c.directories.output=dist/final`.
+  Packaged native sources match the final checkout byte-for-byte; the executable
+  has a Windows PE header and the existing board/audio/PeerJS files are bundled.
+- The configured full `npm run dist:win -- --publish never` produced a portable
+  EXE, then failed at NSIS with `spawn wine ENOENT`. Its incomplete installer was
+  removed. Normal compression and both targets are retained in Windows CI.
+- Workflow YAML, branch trigger, test/build/artifact steps and source diff validated.
+- `node tests/desktop-smoke.cjs` was attempted locally but Electron could not
+  initialize without an X server/display. No Windows runtime success is claimed.
+- Packaged Windows smoke test requires Windows CI/a Windows computer.
+- Native local WebRTC browser test was executed here but failed to connect:
+  channels remained in new/connecting state. Simulated transport is not evidence
+  of real internet P2P connectivity. Verify public PeerJS host/join on two PCs.
+- No TURN relay is bundled; restricted networks may not connect. Host is trusted;
+  sessions survive temporary interruption while both applications stay open.
+- No exhaustive test of every card combination or public internet match is claimed.
+- Preserve LICENSE and THIRD_PARTY_NOTICES; source licensing does not establish
+  clearance to redistribute third-party Witcher artwork/audio.
 
-## P6: packaging and delivery
-
-- Electron 45.1.0, sandbox, context isolation, no Node/preload renderer access,
-  CSP, navigation/window restrictions and restricted secure resource protocol.
-- Windows x64 portable and NSIS configurations; no automatic publishing.
-- Windows Actions runs checks, simulated matches, real local PeerJS/WebRTC
-  browser match, both package targets and a packaged-executable smoke test.
-- A local Windows portable executable was cross-built. Full local NSIS build
-  stopped on missing Wine; its incomplete installer was removed.
-- Final portable rebuild uses fast/store compression locally; CI retains normal
-  compression. Build/source consistency is checked against the packaged ASAR.
-- README completely rewritten around the actual desktop workflow, supported
-  features, build commands, attributions and verification limits.
-- `THIRD_PARTY_NOTICES.md` preserves source/dependency attribution and separates
-  source licensing from unresolved Witcher media redistribution rights.
-- `RELEASE_CHECKLIST.md` records the concrete remaining publication steps.
-
-## Remaining external checks / blockers
-
-1. Run Windows CI after the branch is pushed with repository-owner authorization.
-2. Complete a public-signaling match between two Windows computers, including
-   reconnect during a normal turn and an ability choice.
-3. Validate Windows portable/installer startup, local settings and uninstall.
-4. Resolve asset redistribution rights before public binary release.
-
-No TURN relay is bundled; restrictive NAT/firewalls may prevent direct joining.
-The host is trusted. Closing/reloading either application loses recovery state.
-No PR, merge, push or release has been performed. Authenticated GitHub write
-access is not configured here; a source-only unified patch is the delivery path.
+No push, pull request, merge, version change, tag or release was performed.

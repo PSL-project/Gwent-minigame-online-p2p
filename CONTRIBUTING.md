@@ -68,3 +68,18 @@ For vulnerabilities (e.g., credential exposure, unauthorized actions, or remote 
 By contributing, you agree that your contribution can be distributed under the repository's applicable license and that you have the right to submit it. Third-party code and assets must be clearly identified and properly licensed.
 
 Please be respectful and constructive in issues, reviews, and discussions.
+
+
+## Native multiplayer interface
+
+Keep native multiplayer changes on `feature/native-multiplayer-ui`. The visible
+board must never call authoritative Player or Board gameplay methods. Map input
+through host-issued capabilities and render filtered snapshots; the original
+rules run in the host’s isolated document. Preserve single-player behavior.
+
+Run `npm run check`, `npm test`, `npm run test:integration` and
+`npm run test:browser`. The browser suite includes actual card/board clicks and
+runs with real local WebRTC by default. Set `SIMULATE_WEBRTC=1` for deterministic
+transport coverage; report which mode ran. Windows CI runs both, then builds and
+smoke-tests the packaged app. Treat network-provided UI text as untrusted text.
+Do not add test-only transport hooks or fixture setup to production code.

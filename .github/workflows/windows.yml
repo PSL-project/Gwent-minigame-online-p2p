@@ -1,7 +1,7 @@
 name: Windows desktop build
 on:
   push:
-    branches: [main, 'development/**']
+    branches: [main, 'development/**', 'feature/native-multiplayer-ui']
   pull_request:
   workflow_dispatch:
 permissions:
@@ -21,7 +21,12 @@ jobs:
       - run: npm test
       - run: npx playwright install chromium
       - run: npm run test:integration
-      - run: npm run test:browser
+      - name: Native UI regression (simulated transport)
+        run: npm run test:browser
+        env:
+          SIMULATE_WEBRTC: '1'
+      - name: Native UI with real local WebRTC
+        run: npm run test:browser
       - run: npm run dist:win -- --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'

@@ -5,7 +5,7 @@
 <head>
 	<title>Gwent Classic Online</title>
 	<meta charset="utf-8" />
-	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.youtube.com https://s.ytimg.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self' https://0.peerjs.com wss://0.peerjs.com; frame-src https://www.youtube.com; object-src 'none'; base-uri 'none'; form-action 'none'" />
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.youtube.com https://s.ytimg.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self' https://0.peerjs.com wss://0.peerjs.com; frame-src 'self' https://www.youtube.com; object-src 'none'; base-uri 'none'; form-action 'none'" />
 	<meta name="author" content="Arun Sundaram" />
 	<meta name="description" content="Play the original Gwent minigame from The Witcher 3 in your browser! Includes cards from Hearts of Stone and Blood & Wine!" />
 	<meta name="keywords" content="arun, sundaram, programmer, gwent, tw3, witcher, card, game, gamedev, play" />
@@ -46,19 +46,10 @@
 <aside id="online-banner" hidden>
   <span id="online-connection" role="status" aria-live="polite"></span>
   <button id="online-lobby-open">Lobby</button>
-  <button id="online-inspect" hidden>Inspect cards</button>
+  <span id="online-turn-status" hidden role="status" aria-live="polite"></span>
   <button id="online-retry">Retry connection</button>
   <button data-online-abandon>Leave session</button>
 </aside>
-<section id="online-dock" hidden aria-label="Online game actions"></section>
-<section id="online-inspector" hidden role="dialog" aria-label="Card inspection">
-  <div class="online-inspector-content">
-    <button id="online-inspect-close">Close inspection</button>
-    <h2>Cards in this match</h2>
-    <p id="online-inspect-description">Select a card to read its abilities.</p>
-    <div id="online-inspect-cards"></div>
-  </div>
-</section>
 
 <div id="dimensions" style="position:fixed;width:100vw;height:calc(100vw * 1080 / 1920);"></div>
 
@@ -349,6 +340,7 @@
 <script src="online/protocol.js"></script>
 <script src="online/transport.js"></script>
 <script src="online/engine.js"></script>
+<script src="online/native-ui.js"></script>
 <script src="online/app.js"></script>
 <script src="online/legacy-events.js"></script>
 </body>

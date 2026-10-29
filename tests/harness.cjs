@@ -33,14 +33,19 @@ function client() {
   w.Peer = FakePeer; w.alert = message => { throw Error('Alert: ' + message); }; w.confirm = () => true;
   w.Audio = class { constructor() { this.volume = 1; } play() { return Promise.resolve(); } pause() {} addEventListener() {} };
   const run = code => vm.runInContext(code, ctx);
-  for (const file of ['common.js', 'cards.js', 'decks.js', 'abilities.js', 'factions.js', 'gwent.js', 'online/protocol.js', 'online/transport.js', 'online/engine.js', 'online/app.js', 'online/legacy-events.js']) run(fs.readFileSync(path.join(root, file), 'utf8'));
+  for (const file of ['common.js', 'cards.js', 'decks.js', 'abilities.js', 'factions.js', 'gwent.js', 'online/protocol.js', 'online/transport.js', 'online/engine.js', 'online/native-ui.js', 'online/app.js', 'online/legacy-events.js']) run(fs.readFileSync(path.join(root, file), 'utf8'));
   run(`sleep = () => Promise.resolve();
     sleepUntil = predicate => new Promise(resolve => { const timer = setInterval(() => { if (predicate()) { clearInterval(timer); resolve(); } }, 1); });
     translateTo = async () => {}; translate = async () => {};
     fadeIn = async elem => elem.classList.remove('hide'); fadeOut = async elem => elem.classList.add('hide');
     Card.prototype.animate = async () => {}; AudioManager.playSFX = async () => {};
     ui.notification = async () => {}; userInteracted = false;`);
-  return { dom, w, run, close() { w.onlineApp.engine?.stop(); w.onlineApp.session?.close(); dom.window.close(); } };
+  const result = { dom, w, run, close() { w.onlineApp.engine?.stop(); w.onlineApp.session?.close(); result.authority?.close(); dom.window.close(); } };
+  w.onlineApp.createAuthority = async () => {
+    result.authority = client();
+    return result.authority.w;
+  };
+  return result;
 }
 async function wait(predicate, description, timeout = 5000) {
   const end = Date.now() + timeout;
