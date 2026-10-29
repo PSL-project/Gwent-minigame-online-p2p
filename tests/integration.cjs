@@ -23,7 +23,9 @@ async function step(host, guest, choose) {
   if (!actions.length) return false;
   const a = choose(actions, actor, !!e.prompt) || actions[0];
   const revision = e.caps.revision;
-  (actor ? guest : host).w.onlineApp.act(revision, a.id);
+  const current = (actor ? guest : host).w.onlineApp;
+  await wait(() => current.latest?.revision === revision && current.latest.actions.some(x => x.id === a.id), 'client receives legal action');
+  current.act(revision, a.id);
   await wait(() => e.caps.revision !== revision, 'action accepted');
   return true;
 }
@@ -37,20 +39,20 @@ async function step(host, guest, choose) {
     await wait(() => h.w.onlineApp.engine.ready, 'initial turn');
     const e = h.w.onlineApp.engine;
     const hostView = JSON.parse(JSON.stringify(e.view(0))), guestView = JSON.parse(JSON.stringify(e.view(1)));
-    g.w.onlineApp.renderGuest(guestView);
+    g.w.onlineApp.native.render(guestView);
     assert.ok(g.w.document.querySelector('#leader-me .card'));
     assert.equal(g.w.document.querySelector('#hand-row').children.length, guestView.players[1].handCount);
     assert.equal(hostView.players[1].hand, null); assert.equal(guestView.players[0].hand, null);
     assert.equal('deck' in guestView.players[0], false); assert.equal('deck_data' in guestView.players[0], false);
     assert.ok(!JSON.stringify(guestView).includes('deck_data')); g.w.onlineApp.validateView(guestView);
     const before = e.caps.revision;
-    await assert.rejects(() => e.act(1 - h.run('game.currPlayer.id'), before, e.actions[h.run('game.currPlayer.id')][0].id), /illegal/);
+    await assert.rejects(() => e.act(1 - h.authority.run('game.currPlayer.id'), before, e.actions[h.authority.run('game.currPlayer.id')][0].id), /illegal/);
     assert.equal(e.caps.revision, before);
     // Drop live channel. No action may mutate state while paused.
     const state = JSON.stringify(e.view(1));
     clearInterval(g.w.onlineApp.session.timer); g.w.onlineApp.session.conn.close();
     assert.equal(h.w.onlineApp.paused, true); assert.equal(g.w.onlineApp.paused, true);
-    const actor = h.run('game.currPlayer.id');
+    const actor = h.authority.run('game.currPlayer.id');
     await assert.rejects(() => e.act(actor, before, e.actions[actor][0].id), /paused/);
     assert.equal(e.caps.revision, before);
     g.w.onlineApp.session.retry();

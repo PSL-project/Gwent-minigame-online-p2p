@@ -6,7 +6,7 @@ class OnlineEngine {
     this.caps = new GwentProtocol.Capabilities();
     this.actions = [[], []]; this.ready = false; this.active = true;
     this.decisionPlayer = null; this.prompt = null;
-    this.waiters = []; this.install();
+    this.waiters = []; this.cardIds = new WeakMap(); this.install();
   }
   fail(error) { this.fault = error.message || String(error); this.ready = false; this.sync(); console.error(error); }
   async gate() {
@@ -54,7 +54,7 @@ class OnlineEngine {
     });
     this.wrap(ui, 'waitForRowSelection', async (original, card) => {
       const rows = ['close', 'ranged'].map(type => board.getRow(card, type, card.holder));
-      return this.choose(card.holder.id, 'Choose a row for ' + card.name, rows.map(row => ({ label: row.type, value: row })));
+      return this.choose(card.holder.id, 'Choose a row for ' + card.name, rows.map(row => ({ label: row.type, destination: this.destination(row), value: row })), this.card(card));
     });
     // Online startup uses the same mulligan rules, with an independent choice per player.
     game.initialRedraw = async () => {
@@ -68,20 +68,26 @@ class OnlineEngine {
   card(c) {
     // Only explicit public properties. Never serialize engine objects, holders or closures.
     const index = card_dict.findIndex(d => d.filename === c.filename && d.deck === c.faction);
-    return { index, power: c.power };
+    if (!this.cardIds.has(c)) this.cardIds.set(c, GwentProtocol.token());
+    return { index, power: c.power, uid: this.cardIds.get(c) };
   }
-  choose(actor, title, options) {
+  choose(actor, title, options, card = null) {
     return new Promise(resolve => {
       const build = () => {
         this.caps.clear(); this.actions = [[], []];
-        this.prompt = { actor, title };
-        this.actions[actor] = options.map(option => this.caps.add(actor, { label: option.label, card: option.card || null, kind: 'choice' }, async () => {
+        this.prompt = { actor, title, card };
+        this.actions[actor] = options.map(option => this.caps.add(actor, { label: option.label, card: option.card || null, kind: 'choice', destination: option.destination || null }, async () => {
           this.prompt = null; this.actions = [[], []]; this.sync(); resolve(option.value);
         }));
         this.sync();
       };
       build();
     });
+  }
+  destination(row) {
+    if (row === weather) return { type: 'weather' };
+    const i = board.row.indexOf(row);
+    return { type: 'row', owner: i < 3 ? 1 : 0, row: row.type };
   }
   rowsFor(card) {
     const p = card.holder;
@@ -100,17 +106,17 @@ class OnlineEngine {
     for (const c of p.hand.cards) {
       const description = { kind: 'play', card: this.card(c) };
       if (c.name === 'Scorch') {
-        add({ ...description, label: c.name }, () => p.playScorch(c));
+        add({ ...description, destination: { type: 'any-row' }, label: c.name }, () => p.playScorch(c));
       } else if (c.name === 'Decoy') {
         for (const row of board.row.filter((r, i) => p === player_me ? i >= 3 : i < 3)) {
           for (const target of row.cards.filter(c => c.isUnit())) {
-            add({ ...description, label: 'Decoy → ' + target.name + ' (' + row.type + ')' }, async () => {
+            add({ ...description, destination: { type: 'card', uid: this.card(target).uid }, label: 'Decoy → ' + target.name + ' (' + row.type + ')' }, async () => {
               await board.toHand(target, row); await board.moveTo(c, row, p.hand); p.endTurn();
             });
           }
         }
       } else {
-        for (const row of this.rowsFor(c)) add({ ...description, label: c.name + ' → ' + (row.type || 'weather') }, () => p.playCardToRow(c, row));
+        for (const row of this.rowsFor(c)) add({ ...description, destination: this.destination(row), label: c.name + ' → ' + (row.type || 'weather') }, () => p.playCardToRow(c, row));
       }
     }
   }
@@ -123,11 +129,12 @@ class OnlineEngine {
   view(actor) {
     const players = [player_me, player_op];
     return {
-      revision: this.caps.revision,
+      uiSchema: 1, revision: this.caps.revision,
       state: game.state === GameState.END_SCREEN ? 'complete' : 'playing',
       round: game.roundCount, turn: game.currPlayer?.id ?? null,
       fault: this.fault || null,
       prompt: this.prompt ? (this.prompt.actor === actor ? this.prompt.title : 'Opponent is choosing…') : null,
+      choiceCard: this.prompt?.actor === actor ? this.prompt.card : null,
       actions: this.connected() ? this.actions[actor] : [],
       players: players.map((p, id) => ({
         id, faction: p.deck.faction, health: p.health, total: p.total, passed: p.passed,
@@ -157,3 +164,16 @@ class OnlineEngine {
     await game.startGame();
   }
 }
+
+// Called only inside the host’s isolated rules document. No networking lives here.
+window.createOnlineEngine = (publish, connected) => {
+  // Cosmetic timing belongs to the visible projection. This document only runs rules.
+  sleep = () => Promise.resolve();
+  translateTo = async () => {};
+  Card.prototype.animate = async () => {};
+  AudioManager.playSFX = async () => {};
+  ui.notification = async () => {};
+  const engine = new OnlineEngine(publish, connected);
+  onlineApp.engine = engine;
+  return engine;
+};

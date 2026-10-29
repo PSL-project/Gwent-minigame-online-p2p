@@ -19,14 +19,14 @@ exchange is required. Online connectivity depends on the players’ networks and
 public signaling availability; see [Networking](#networking).
 
 
-<img width="1919" height="1028" alt="image" src="https://github.com/user-attachments/assets/5b2e0b93-ccc8-4c0c-b95f-bcbebe72679c" />
+
 
 
 
 ## Features
 
 - **Single player, offline:** the original AI, rules, local sound effects and deck editor.
-- **Private two-player multiplayer:** Host Online Game or Join Online Game from the opening screen.
+- **Native graphical multiplayer:** click the original hand cards, battlefield, leader card and Pass control as host or guest. Host or join from the opening screen.
 - **One invitation:** copy the host’s code, share it privately and paste it into Join.
 - **Your decks:** customize factions, leaders and card collections with the original editor; import/export deck JSON and save local settings.
 - **The original rules engine:** card placement, weather, spies, muster, medics, decoys, leaders, faction perks, scoring and round resolution run on the host.
@@ -65,7 +65,7 @@ in-memory credential.
 3. Select/customize your deck, then confirm **Ready**.
 4. Complete the redraw prompts and take your turns.
 
-Both players must run version **1.0.0**. Incompatible clients are rejected.
+Both players must use the **native multiplayer UI build**, currently version **1.0.0**. Older builds with the same version number may use the previous action panel; incompatible gameplay views are rejected with an update message.
 No separate code-lookup service is used: the invitation directly identifies the
 host’s signaling peer and includes the session secret.
 
@@ -79,15 +79,19 @@ Faction perks and card effects can modify the outcome of a tied round.
 | Mode/control | Interaction |
 | --- | --- |
 | Single player | Select a hand card, then its destination; select your leader to use its ability; choose **Pass** to pass. |
-| Online turns | Use the action bar along the bottom. Select a card, then choose a destination/target when more than one is legal. |
-| Online choices | Answer redraw, medic, leader and faction prompts in the same action bar. |
-| Inspect cards | Read your hand, leaders, public board and discard-pile abilities through **Inspect cards**. |
+| Online turns | Click an actual card in your hand, then click its highlighted battlefield row or weather area. Click a highlighted unit to replace it with a Decoy. |
+| Pass | Use the original **Pass** control on the left of the board. It becomes available only when passing is legal. |
+| Leaders | Click your leader card, then the large central card in its confirmation carousel to activate it. |
+| Redraw and special choices | Browse the original graphical carousel and click its central card. **Done / keep remaining cards** ends an optional redraw; required choices must be answered. Agile resurrection uses highlighted rows. |
+| Inspect cards | Click hand cards, battlefield cards, leaders or discard piles to view their artwork and abilities, including outside your turn. Opposing hands and draw-pile contents remain hidden unless a rule authorizes a reveal. |
+| Cancel a selection | Click the selected hand card again or press **Escape**. Required ability choices cannot be skipped. |
 | Connection controls | The top bar shows connection status, **Retry connection** and **Leave session**. |
 | Fullscreen | **F11**, or View → Toggle Fullscreen in the desktop menu. |
 | Audio/notifications | Use the original settings icons; settings are stored locally. |
 
-The online result screen reports each completed round. Return to the menu to
-start another session with a new invitation.
+Both players use the same board controls. A selected card is outlined in gold; only host-authorized destinations are highlighted. The board changes after the host accepts an action. During processing or disconnection, new gameplay submissions are disabled.
+
+The original result screen reports each completed round. Choose **Return to menu** to start another session with a new invitation, or switch to single player. No separate text-based gameplay action list is displayed.
 
 ## Networking
 
@@ -133,18 +137,81 @@ saving a match across application restarts is not implemented.
 
 
 
+## Download and Windows installation
+
+Open the [Releases page](https://github.com/PSL-project/Gwent-minigame-online-p2p/releases)
+and choose a build whose notes include native multiplayer controls. Existing
+releases may predate this development branch; no new release is created by these
+source changes.
+
+Extract the downloaded archive before running it. Use the `setup-x64.exe` to
+install the application, or launch the `portable-x64.exe` directly. Players need
+64-bit Windows 10 or Windows 11; Node.js and development tools are not required
+for the packaged application. Both players should install the same build.
+
+## Build and contribute
+
+Development requires Node.js 24 and npm. From a checkout of
+`feature/native-multiplayer-ui`:
+
+```sh
+npm ci
+npm start
+```
+
+Run the checks and build on Windows:
+
+```sh
+npm run check
+npm test
+npm run test:integration
+npx playwright install chromium
+npm run test:browser
+npm run dist:win -- --publish never
+```
+
+The browser suite uses two independent clients and local test-only PeerJS
+signaling. For deterministic UI testing where native WebRTC is blocked, set
+`SIMULATE_WEBRTC=1` before running it. In PowerShell:
+
+```powershell
+$env:SIMULATE_WEBRTC = "1"
+npm run test:browser
+Remove-Item Env:SIMULATE_WEBRTC
+```
+
+Windows builds produce portable and installer executables in `dist/`. The
+**Windows desktop build** Actions workflow runs tests, packages both targets and
+smoke-tests the packaged application. Download successful build outputs from its
+**Artifacts** section. It does not automatically publish a release.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidance,
+[DEVELOPMENT_STATUS.md](DEVELOPMENT_STATUS.md) for actual verification results,
+and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) before publishing.
+
+The native UI only presents snapshots and submits permissions. The host runs the
+original DOM-backed engine in a separate hidden document; its DOM is independent
+of both visible boards. Incoming actions still contain only a permission ID and
+revision, so graphical input never bypasses host validation. Per-card IDs
+separate identical copies without exposing hidden opponent cards.
+
 ## Verification and current limitations
 
-- Automated rules/transport tests pass, including all 17 active leader abilities,
-  scoring, weather, bond, horn, spy, muster, medic, agile choices and decoy targeting.
-- Complete simulated multiplayer matches cover all five factions; a complete AI
-  match and a two-context graphical match with simulated transport also pass.
-- This development environment exchanges real PeerJS offers/answers but produces
-  no native ICE candidates. End-to-end direct WebRTC connectivity and the public
-  signaling invitation flow still require verification on supported networks.
-- A Windows portable package has been cross-built. Native Windows startup is
-  delegated to CI; local Linux root/sandbox restrictions prevent a valid desktop
-  runtime check. The local installer build requires unavailable Wine tooling.
+- **Passed locally:** 15 automated tests, including original scoring/effects,
+  all 17 active leaders, protocol/security/recovery and native-input validation.
+- **Passed locally:** three complete simulated multiplayer matches covering all
+  five factions and a complete original single-player AI match.
+- **Passed locally:** two-context Chromium click tests for host and guest cards,
+  placement, Pass, redraw, spy, decoy, medic/agile resurrection, weather/clear,
+  horn, scorch, leader choices, reconnect, complete results and another game.
+  These tests use simulated delivery and do not prove internet connectivity.
+- **Network verification outstanding:** the real local WebRTC test was executed
+  here but could not establish a channel. Public PeerJS invitation joining and
+  recovery need a manual match between two Windows computers on supported networks.
+- **Packaging:** a Windows x64 portable EXE was cross-built. The local NSIS build
+  stopped on missing Wine; Windows installer generation and packaged startup
+  remain checks for Windows CI. Local Electron startup failed because this
+  environment has no graphical display. See the development status for details.
 - No exhaustive claim is made for every card combination. The host is trusted:
   guest filtering is not an anti-cheat guarantee against a modified host.
 - There is no TURN service, spectator mode, public matchmaking, account system,
