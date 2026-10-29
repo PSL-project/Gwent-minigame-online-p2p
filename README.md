@@ -6,6 +6,12 @@
 
 
 
+lost a loved one? crushed by the world problem? your daughter is in grave danger?
+hmm... HOW ABOUT A ROUND OF GWENT?😂🤷‍♂️
+
+
+
+
 
 Play the original Gwent minigame against the AI, or invite a friend to a private
 online match with a single code. Gwent Classic Online preserves the familiar
@@ -188,26 +194,3 @@ Dependency attributions and additional details are in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 
-## Android integration checkpoint
-
-Branch `feature/android-support` includes Capacitor 8.6.0, the generated Android
-project, locally bundled shared game assets and a debug APK Actions workflow.
-Run `npm ci`, `npm run android:sync`, then `bash android/gradlew -p android assembleDebug`
-with Java 21 and Android SDK 36 installed. Minimum Android API is 24.
-Generated web assets and build outputs are not tracked. The debug APK is for testing;
-no production signing credentials or release publication are configured.
-Download successful workflow artifacts, extract the APK and allow installation
-from the browser/file manager when Android requests it.
-
-Synchronization passed locally. APK compilation, installation, Android back-button
-behavior, safe-area/aspect-ratio coverage, offline device gameplay and physical
-Windows/Android internet matches remain unverified. Current touch changes are
-initial adaptations, not a completed mobile-layout validation. Sound effects are
-local; optional YouTube music still requires internet. Do not describe this
-checkpoint as a verified Android release.
-
-For a combined release, separately run Windows and Android workflows on the same
-reviewed commit, download their artifacts and manually attach both EXEs and the APK
-to one draft GitHub Release. Actions artifacts are not release attachments.
-Before production distribution, configure release signing outside Git, retain the
-same private signing key for future updates and verify an upgrade on a device.
