@@ -14,12 +14,16 @@
     "check": "node scripts/check.cjs",
     "dist:win": "electron-builder --win --x64",
     "pack": "electron-builder --dir",
-    "test:browser": "node tests/browser.cjs"
+    "test:browser": "node tests/browser.cjs",
+    "android:sync": "node scripts/android-web.cjs && cap sync android"
   },
   "dependencies": {
+    "@capacitor/android": "8.6.0",
+    "@capacitor/core": "8.6.0",
     "peerjs": "1.5.5"
   },
   "devDependencies": {
+    "@capacitor/cli": "8.6.0",
     "electron": "45.1.0",
     "electron-builder": "26.18.0",
     "jsdom": "27.4.0",

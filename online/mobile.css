@@ -1,0 +1,8 @@
+@media (pointer: coarse) {
+  html, body { overflow-x: hidden; touch-action: manipulation; }
+  button, .card, .field-row, #pass-button { touch-action: manipulation; }
+  #online-menu input { font-size: 16px; }
+  .online-dialog { padding: 12px; max-height: 94dvh; }
+  #online-banner button { min-height: 36px; }
+  #online-menu { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+}
