@@ -153,88 +153,22 @@ saving a match across application restarts is not implemented.
 
 
 
-## Download and Windows installation
 
-Open the [Releases page](https://github.com/PSL-project/Gwent-minigame-online-p2p/releases)
-and choose a build whose notes include native multiplayer controls. Existing
-releases may predate this development branch; no new release is created by these
-source changes.
 
-Extract the downloaded archive before running it. Use the `setup-x64.exe` to
-install the application, or launch the `portable-x64.exe` directly. Players need
-64-bit Windows 10 or Windows 11; Node.js and development tools are not required
-for the packaged application. Both players should install the same build.
 
-## Build and contribute
 
-Development requires Node.js 24 and npm. From a checkout of
-`feature/native-multiplayer-ui`:
+##  Current limitations
 
-```sh
-npm ci
-npm start
-```
-
-Run the checks and build on Windows:
-
-```sh
-npm run check
-npm test
-npm run test:integration
-npx playwright install chromium
-npm run test:browser
-npm run dist:win -- --publish never
-```
-
-The browser suite uses two independent clients and local test-only PeerJS
-signaling. For deterministic UI testing where native WebRTC is blocked, set
-`SIMULATE_WEBRTC=1` before running it. In PowerShell:
-
-```powershell
-$env:SIMULATE_WEBRTC = "1"
-npm run test:browser
-Remove-Item Env:SIMULATE_WEBRTC
-```
-
-Windows builds produce portable and installer executables in `dist/`. The
-**Windows desktop build** Actions workflow runs tests, packages both targets and
-smoke-tests the packaged application. Download successful build outputs from its
-**Artifacts** section. It does not automatically publish a release.
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidance,
-[DEVELOPMENT_STATUS.md](DEVELOPMENT_STATUS.md) for actual verification results,
-and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) before publishing.
-
-The native UI only presents snapshots and submits permissions. The host runs the
-original DOM-backed engine in a separate hidden document; its DOM is independent
-of both visible boards. Incoming actions still contain only a permission ID and
-revision, so graphical input never bypasses host validation. Per-card IDs
-separate identical copies without exposing hidden opponent cards.
-
-## Verification and current limitations
-
-- **Passed locally:** 15 automated tests, including original scoring/effects,
-  all 17 active leaders, protocol/security/recovery and native-input validation.
-- **Passed locally:** three complete simulated multiplayer matches covering all
-  five factions and a complete original single-player AI match.
-- **Passed locally:** two-context Chromium click tests for host and guest cards,
-  placement, Pass, redraw, spy, decoy, medic/agile resurrection, weather/clear,
-  horn, scorch, leader choices, reconnect, complete results and another game.
-  These tests use simulated delivery and do not prove internet connectivity.
-- **Network verification outstanding:** the real local WebRTC test was executed
-  here but could not establish a channel. Public PeerJS invitation joining and
-  recovery need a manual match between two Windows computers on supported networks.
-- **Packaging:** a Windows x64 portable EXE was cross-built. The local NSIS build
-  stopped on missing Wine; Windows installer generation and packaged startup
-  remain checks for Windows CI. Local Electron startup failed because this
-  environment has no graphical display. See the development status for details.
 - No exhaustive claim is made for every card combination. The host is trusted:
   guest filtering is not an anti-cheat guarantee against a modified host.
 - There is no TURN service, spectator mode, public matchmaking, account system,
   application-restart recovery or automatic update service.
 
+  
+
 ## Licensing and attribution
 
+This Game uses the game logic and assets from 
 Original Gwent Classic by **Arun Sundaram**. See the
 [original project](https://github.com/asundr/gwent-classic).
 Sound-effect contributions were credited by the original project to
