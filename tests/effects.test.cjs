@@ -39,7 +39,7 @@ test('spy draws two and muster reuses original hand/deck effects', async () => {
     await c.runAsync(`const spy = hand('Prince Stennis'); await board.moveTo(spy, board.getRow(spy, 'close'), player_me.hand)`);
     assert.equal(c.run('player_me.hand.cards.length'), 2); assert.equal(c.run('player_me.deck.cards.length'), before - 2);
     assert.equal(c.run('board.row[2].cards[0].name'), 'Prince Stennis');
-    await c.runAsync(`player_me.deck.reset(); hand("Gaunter O'Dimm - Darkness"); hand("Gaunter O'Dimm - Darkness"); const muster = hand("Gaunter O'Dimm"); await board.moveTo(muster, board.getRow(muster, 'siege'), player_me.hand)`);
+    await c.runAsync(`player_me.deck.reset(); player_me.hand.reset(); hand("Gaunter O'Dimm - Darkness"); hand("Gaunter O'Dimm - Darkness"); const muster = hand("Gaunter O'Dimm"); await board.moveTo(muster, board.getRow(muster, 'siege'), player_me.hand)`);
     assert.equal(c.run('board.row[4].cards.filter(c => c.name.includes("Darkness")).length'), 2);
   } finally { c.close(); }
 });
