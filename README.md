@@ -1,6 +1,8 @@
 # Gwent (Classic P2P Online)
 
-**Classic Gwent. Private matches with friends. A standalone Windows experience.**
+**Classic Gwent from *The Witcher 3*, on Windows and Android. Play solo against the AI or invite a friend to a private match.**
+
+**Cross-platform game is now available!**
 
 
 
@@ -33,6 +35,20 @@ public signaling availability; see [Networking](#networking).
 - **Private guest views:** the guest receives its own hand, public board/discards and counts, without the host’s hand or draw-pile contents.
 - **Recoverable sessions:** interrupted connections pause play and attempt authenticated reconnection while both applications remain open.
 - **Windows packaging:** portable executable and installer targets, bundled game assets and automated Windows builds.
+- **Android version included
+- **Cross-platform
+
+## Windows
+
+download the latest release for windows and play. both portable and installer version included
+
+## Android
+
+download the apk file from latest release and play.
+
+## Cross-platform
+
+Windows and Android users now can play with each other. make sure to have latest release on both systems.
 
 
 ## Play against the AI
