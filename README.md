@@ -164,11 +164,8 @@ this project does not infer additional permissions from that omission. Preserve
 all required notices and do not describe this as unrestricted MIT software.
 
 The Witcher, Gwent, their art, audio, fonts, characters and trademarks belong to
-their respective rights holders, including CD PROJEKT where applicable. This is an
-unofficial fan project, without affiliation or endorsement. Source-code licensing
-does not establish permission to redistribute those assets. Asset clearance has
-not been established; maintainers must resolve applicable rights before public
-binary distribution.
+their respective rights holders, including CD PROJEKT where applicable. 
+
 
 Dependency attributions and additional details are in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
